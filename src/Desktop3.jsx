@@ -111,20 +111,20 @@ export default function Desktop3() {
 
           {/* Buttons */}
           <div className="flex gap-[10px] items-center justify-end shrink-0">
-            <div className="btn-ghost flex h-[45px] items-center justify-center overflow-clip px-[16px] py-[12px] rounded-[6px] shrink-0 cursor-pointer" style={{ background: 'rgba(221,51,51,0.1)' }}>
+            <a href="https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan" target="_blank" rel="noopener noreferrer" className="btn-ghost flex h-[45px] items-center justify-center overflow-clip px-[16px] py-[12px] rounded-[6px] shrink-0" style={{ background: 'rgba(221,51,51,0.1)', textDecoration: 'none' }}>
               <p className="text-[#d33] text-[16px] whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Login</p>
-            </div>
-            <div className="btn-primary flex h-[45px] items-center justify-center overflow-clip px-[16px] py-[12px] rounded-[6px] shrink-0 cursor-pointer" style={{ background: '#dd3333' }}>
+            </a>
+            <a href="https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan" target="_blank" rel="noopener noreferrer" className="btn-primary flex h-[45px] items-center justify-center overflow-clip px-[16px] py-[12px] rounded-[6px] shrink-0" style={{ background: '#dd3333', textDecoration: 'none' }}>
               <p className="text-white text-[16px] whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Get Started</p>
-            </div>
+            </a>
           </div>
         </div>
 
         {/* CTA button */}
         <div className="absolute flex gap-[10px] items-start justify-end" style={{ left: '50%', transform: 'translateX(-50%) translateX(0.5px)', top: 341 }}>
-          <div className="btn-primary flex h-[45px] items-center justify-center overflow-clip px-[16px] py-[12px] rounded-[6px] shrink-0 cursor-pointer" style={{ background: '#dd3333' }}>
+          <a href="https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan" target="_blank" rel="noopener noreferrer" className="btn-primary flex h-[45px] items-center justify-center overflow-clip px-[16px] py-[12px] rounded-[6px] shrink-0" style={{ background: '#dd3333', textDecoration: 'none' }}>
             <p className="text-white text-[16px] whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Attempt your first Mock Test</p>
-          </div>
+          </a>
         </div>
 
         {/* Score card top-left */}
