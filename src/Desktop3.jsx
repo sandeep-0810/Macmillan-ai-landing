@@ -1,12 +1,12 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import './styles.css'
 
 function useReveal() {
   useEffect(() => {
-    const els = document.querySelectorAll('.reveal')
+    const els = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale')
     const io = new IntersectionObserver(
       (entries) => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target) } }),
-      { threshold: 0.12 }
+      { threshold: 0.05, rootMargin: '0px 0px -50px 0px' }
     )
     els.forEach(el => io.observe(el))
     return () => io.disconnect()
@@ -87,77 +87,138 @@ const imgCTABg       = "https://www.figma.com/api/mcp/asset/cfe5b066-7375-4757-b
 
 export default function Desktop3() {
   useReveal()
+  const [activeSection, setActiveSection] = useState('')
+
+  useEffect(() => {
+    const sections = ['features', 'preparation', 'tools', 'tutors', 'get-started']
+    
+    const observerCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id
+          const mapping = {
+            'features': 'features',
+            'preparation': 'preparation',
+            'tools': 'tools',
+            'tutors': 'ai-tutors',
+            'get-started': 'get-started'
+          }
+          setActiveSection(mapping[id])
+        }
+      })
+    }
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-30% 0px -60% 0px',
+      threshold: 0
+    }
+
+    const io = new IntersectionObserver(observerCallback, observerOptions)
+    sections.forEach((id) => {
+      const el = document.getElementById(id)
+      if (el) io.observe(el)
+    })
+
+    return () => io.disconnect()
+  }, [])
+
+  const handleNavClick = (label) => {
+    const mapping = {
+      'Features': 'features',
+      'Preparation': 'preparation',
+      'Tools': 'tools',
+      'AI Tutors': 'tutors',
+      'Get Started': 'get-started'
+    };
+    const id = mapping[label];
+    if (id) {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
   return (
     <div className="bg-white relative" style={{ width: 1440, margin: '0 auto', fontFamily: "'Poppins', sans-serif" }}>
 
-      {/* ── HERO (Frame 1) ── */}
-      <div className="bg-white relative overflow-clip" style={{ height: 750 }}>
-        {/* background image placeholder */}
-        <div className="absolute" style={{ height: 887, left: -76, top: -54, width: 1774 }} />
+      {/* NAVBAR */}
+      <div className="sticky top-0 z-50 flex items-center justify-between bg-white/90 backdrop-blur-md border-b border-[#f0f0f0] transition-all duration-300" style={{ width: 1440, height: 80, padding: '0 56px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+        {/* Logo */}
+        <div className="relative shrink-0" style={{ width: 190, height: 80 }}>
+          <img alt="Macmillan.AI" className="block" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'left center' }} src={imgLogo} />
+        </div>
 
-        {/* NAVBAR */}
-        <div className="absolute flex items-center justify-between" style={{ left: '50%', transform: 'translateX(-50%) translateX(-1.5px)', top: 0, width: 1327, height: 90 }}>
-          {/* Logo */}
-          <div className="relative shrink-0" style={{ width: 190, height: 90 }}>
-            <img alt="Macmillan.AI" className="block" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'left center' }} src={imgLogo} />
-          </div>
-
-          {/* Nav links */}
-          <div className="flex flex-1 items-center justify-center min-w-0">
-            <div className="flex gap-[48px] items-center text-[#1a1a1a] text-[16px] text-center whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}>
-              {['Features','Preparation','Tools','AI Tutors','Get Started'].map(l => <p key={l} className="nav-link shrink-0 cursor-pointer">{l}</p>)}
-            </div>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex gap-[10px] items-center justify-end shrink-0">
-            <a href="https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan" target="_blank" rel="noopener noreferrer" className="btn-ghost flex h-[45px] items-center justify-center overflow-clip px-[16px] py-[12px] rounded-[6px] shrink-0" style={{ background: 'rgba(221,51,51,0.1)', textDecoration: 'none' }}>
-              <p className="text-[#d33] text-[16px] whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Login</p>
-            </a>
-            <a href="https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan" target="_blank" rel="noopener noreferrer" className="btn-primary flex h-[45px] items-center justify-center overflow-clip px-[16px] py-[12px] rounded-[6px] shrink-0" style={{ background: '#dd3333', textDecoration: 'none' }}>
-              <p className="text-white text-[16px] whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Get Started</p>
-            </a>
+        {/* Nav links */}
+        <div className="flex flex-1 items-center justify-center min-w-0">
+          <div className="flex gap-[48px] items-center text-[#1a1a1a] text-[16px] text-center whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}>
+            {['Features','Preparation','Tools','AI Tutors','Get Started'].map(l => (
+              <p 
+                key={l} 
+                onClick={() => handleNavClick(l)} 
+                className={`nav-link shrink-0 cursor-pointer ${activeSection === l.toLowerCase().replace(' ', '-') ? 'active' : ''}`}
+              >
+                {l}
+              </p>
+            ))}
           </div>
         </div>
 
+        {/* Buttons */}
+        <div className="flex gap-[10px] items-center justify-end shrink-0">
+          <a href="https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan" target="_blank" rel="noopener noreferrer" className="btn-ghost flex h-[40px] items-center justify-center overflow-clip px-[16px] py-[10px] rounded-[6px] shrink-0" style={{ background: 'rgba(221,51,51,0.08)', textDecoration: 'none' }}>
+            <p className="text-[#d33] text-[15px] whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Login</p>
+          </a>
+          <a href="https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan" target="_blank" rel="noopener noreferrer" className="btn-primary flex h-[40px] items-center justify-center overflow-clip px-[16px] py-[10px] rounded-[6px] shrink-0" style={{ background: '#dd3333', textDecoration: 'none' }}>
+            <p className="text-white text-[15px] whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Get Started</p>
+          </a>
+        </div>
+      </div>
+
+      {/* ── HERO (Frame 1) ── */}
+      <div className="bg-white relative overflow-clip" style={{ height: 670 }}>
+        {/* background image placeholder */}
+        <div className="absolute" style={{ height: 887, left: -76, top: -54, width: 1774 }} />
+
         {/* CTA button */}
-        <div className="absolute flex gap-[10px] items-start justify-end" style={{ left: '50%', transform: 'translateX(-50%) translateX(0.5px)', top: 341 }}>
+        <div className="absolute flex gap-[10px] items-start justify-end" style={{ left: '50%', transform: 'translateX(-50%) translateX(0.5px)', top: 261 }}>
           <a href="https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan" target="_blank" rel="noopener noreferrer" className="btn-primary flex h-[45px] items-center justify-center overflow-clip px-[16px] py-[12px] rounded-[6px] shrink-0" style={{ background: '#dd3333', textDecoration: 'none' }}>
             <p className="text-white text-[16px] whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Attempt your first Mock Test</p>
           </a>
         </div>
 
         {/* Score card top-left */}
-        <div className="absolute rounded-[19px]" style={{ height: 133, left: 45, top: 295, width: 273 }}>
+        <div className="absolute rounded-[19px]" style={{ height: 133, left: 45, top: 215, width: 273 }}>
           <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[19px]">
-            <img alt="" className="absolute max-w-none" style={{ height: '591.91%', left: '-17.46%', top: '-186.13%', width: '432.68%' }} src={imgHeroCard1} />
+            <img alt="" className="absolute max-w-none" style={{ height: '591.91%', left: '-17.46%', top: '-186.13%', width: '432.68%' }} src={imgHeroCard1} fetchpriority="high" />
           </div>
         </div>
 
         {/* Ellipses */}
-        <div className="absolute" style={{ left: 408, top: 530, width: 580, height: 580 }}>
+        <div className="absolute" style={{ left: 408, top: 450, width: 580, height: 580 }}>
           <div className="absolute" style={{ inset: '-3.05%' }}>
-            <img alt="" className="block max-w-none size-full" src={imgEllipse1} />
+            <img alt="" className="block max-w-none size-full" src={imgEllipse1} loading="lazy" />
           </div>
         </div>
-        <div className="absolute" style={{ left: 318, top: 414, width: 755, height: 755 }}>
+        <div className="absolute" style={{ left: 318, top: 334, width: 755, height: 755 }}>
           <div className="absolute" style={{ inset: '-4.72% -5.25% -5.77% -5.25%' }}>
-            <img alt="" className="block max-w-none size-full" src={imgEllipse2} />
+            <img alt="" className="block max-w-none size-full" src={imgEllipse2} loading="lazy" />
           </div>
         </div>
 
         {/* Laptop image */}
-        <div className="absolute" style={{ height: 358, left: 275, top: 428, width: 866 }}>
+        <div className="absolute" style={{ height: 358, left: 275, top: 348, width: 866 }}>
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <img alt="" className="absolute max-w-none" style={{ height: '180.43%', left: 0, top: '-80.43%', width: '149.25%' }} src={imgHeroLaptop} />
+            <img alt="" className="absolute max-w-none" style={{ height: '180.43%', left: 0, top: '-80.43%', width: '149.25%' }} src={imgHeroLaptop} fetchpriority="high" />
           </div>
         </div>
 
         {/* Hero heading */}
-        <div className="absolute flex flex-col gap-[15px] items-center" style={{ left: '50%', transform: 'translateX(-50%)', top: 98, width: 1156 }}>
+        <div className="absolute flex flex-col gap-[15px] items-center" style={{ left: '50%', transform: 'translateX(-50%)', top: 18, width: 1156 }}>
           <div className="flex gap-[10px] items-center justify-center px-[16px] py-[8px] rounded-[27px] shrink-0" style={{ background: 'rgba(221,51,51,0.1)', border: '1px solid rgba(221,51,51,0.2)' }}>
             <div className="relative shrink-0" style={{ width: 20, height: 20 }}>
-              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeroBadge} />
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeroBadge} fetchpriority="high" />
             </div>
             <p className="text-[#d33] text-[14px] uppercase whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, lineHeight: 1.3 }}>
               Built around CBSE exam patterns for Class 10 &amp; 12 students.
@@ -178,22 +239,22 @@ export default function Desktop3() {
         </div>
 
         {/* Concept card bottom-left */}
-        <div className="absolute rounded-[23px]" style={{ height: 188, left: 41, top: 445, width: 357 }}>
+        <div className="absolute rounded-[23px]" style={{ height: 188, left: 41, top: 365, width: 357 }}>
           <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[23px]">
-            <img alt="" className="absolute max-w-none" style={{ height: '544.68%', left: '-17.09%', top: '-275%', width: '430.25%' }} src={imgHeroCard1} />
+            <img alt="" className="absolute max-w-none" style={{ height: '544.68%', left: '-17.09%', top: '-275%', width: '430.25%' }} src={imgHeroCard1} loading="lazy" />
           </div>
         </div>
 
         {/* Mock card right */}
-        <div className="absolute rounded-[16px]" style={{ height: 282, left: 969, top: 351, width: 446 }}>
+        <div className="absolute rounded-[16px]" style={{ height: 282, left: 969, top: 271, width: 446 }}>
           <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[16px]">
-            <img alt="" className="absolute max-w-none" style={{ height: '120.33%', left: '-6.95%', top: '-10.34%', width: '114.13%' }} src={imgHeroMock} />
+            <img alt="" className="absolute max-w-none" style={{ height: '120.33%', left: '-6.95%', top: '-10.34%', width: '114.13%' }} src={imgHeroMock} fetchpriority="high" />
           </div>
         </div>
       </div>
 
       {/* ── WHY STUDENTS CHOOSE (Frame 86) ── */}
-      <div className="flex flex-col gap-[125px] items-center relative reveal" style={{ padding: '80px 77px 0', marginLeft: 44 }}>
+      <div id="features" className="flex flex-col gap-[125px] items-center relative reveal" style={{ padding: '80px 77px 0', marginLeft: 44 }}>
         {/* Header */}
         <div className="flex flex-col gap-[48px] items-center relative shrink-0 w-[1285px]">
           <div className="flex flex-col items-start text-center w-[868px]">
@@ -211,57 +272,57 @@ export default function Desktop3() {
             <div className="flex flex-col gap-[16px] items-start w-full">
               {/* Row 1 */}
               <div className="flex gap-[24px] items-center w-full">
-                <div className="bg-white card-hover relative rounded-[12px] overflow-clip shrink-0" style={{ height: 264, width: 752, boxShadow: '0px 0px 5.8px 0px rgba(90,0,0,0.15)' }}>
+                <div className="bg-white card-hover relative rounded-[12px] overflow-clip shrink-0 reveal-left" style={{ height: 264, width: 752, boxShadow: '0px 0px 5.8px 0px rgba(90,0,0,0.15)' }}>
                   <div className="absolute flex flex-col gap-[4px] items-start" style={{ left: 24, top: 28, width: 424 }}>
                     <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 20, color: '#1a1a1a', lineHeight: 1.25, width: '100%' }}>Unlimited fresh mock tests</p>
                     <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, fontSize: 14, color: '#4d4d4d', lineHeight: 'normal', width: '100%' }}>AI generates additional mock test based on CBSE- pattern from previous years. Students never run out of fresh papers.</p>
                   </div>
                   <div className="absolute" style={{ left: 400, top: 0, width: 392, height: 392 }}>
-                    <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgMockGen} />
+                    <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgMockGen} loading="lazy" />
                   </div>
                 </div>
-                <div className="bg-white card-hover relative rounded-[12px] overflow-clip shrink-0" style={{ height: 264, width: 510, boxShadow: '0px 0px 5.8px 0px rgba(90,0,0,0.15)' }}>
+                <div className="bg-white card-hover relative rounded-[12px] overflow-clip shrink-0 reveal-right" style={{ height: 264, width: 510, boxShadow: '0px 0px 5.8px 0px rgba(90,0,0,0.15)' }}>
                   <div className="absolute flex flex-col gap-[4px] items-start" style={{ left: 16, top: 23, width: 477 }}>
                     <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 20, color: '#1a1a1a', lineHeight: 1.25, width: '100%' }}>Find where you lose marks</p>
                     <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, fontSize: 14, color: '#4d4d4d', lineHeight: 'normal', width: '100%' }}>Every answer marked against CBSE's official marking scheme with step-by-step marks, partial credit where applicable, and value-point analysis for long answers.</p>
                   </div>
                   <div className="absolute" style={{ left: 287, top: 115, width: 206, height: 206 }}>
-                    <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgRubric} />
+                    <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgRubric} loading="lazy" />
                   </div>
                 </div>
               </div>
 
               {/* Row 2 */}
               <div className="flex gap-[24px] items-center w-full">
-                <div className="bg-white card-hover relative rounded-[12px] overflow-clip shrink-0" style={{ height: 326, width: 510, boxShadow: '0px 0px 5.8px 0px rgba(90,0,0,0.15)' }}>
+                <div className="bg-white card-hover relative rounded-[12px] overflow-clip shrink-0 reveal-left" style={{ height: 326, width: 510, boxShadow: '0px 0px 5.8px 0px rgba(90,0,0,0.15)' }}>
                   <div className="absolute" style={{ left: 254, top: 110, width: 283, height: 283 }}>
-                    <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgScorePred} />
+                    <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgScorePred} loading="lazy" />
                   </div>
                   <div className="absolute flex flex-col gap-[4px] items-start" style={{ left: 15, top: 23, width: 477 }}>
                     <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 20, color: '#1a1a1a', lineHeight: 1.25, width: '100%' }}>Predict your board score early</p>
                     <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, fontSize: 14, color: '#4d4d4d', lineHeight: 'normal', width: '100%' }}>Predicts likely board exam percentage per subject after each attempt, calibrated against historical CBSE scoring patterns and the student's improvement trajectory.</p>
                   </div>
                 </div>
-                <div className="bg-white card-hover relative rounded-[12px] overflow-clip shrink-0" style={{ height: 326, width: 752, boxShadow: '0px 0px 5.8px 0px rgba(90,0,0,0.15)' }}>
+                <div className="bg-white card-hover relative rounded-[12px] overflow-clip shrink-0 reveal-right" style={{ height: 326, width: 752, boxShadow: '0px 0px 5.8px 0px rgba(90,0,0,0.15)' }}>
                   <div className="absolute flex flex-col gap-[4px] items-start" style={{ left: 20, top: 34, width: 727 }}>
                     <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 20, color: '#1a1a1a', lineHeight: 1.25, width: '100%' }}>Compare with students nationwide</p>
                     <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, fontSize: 14, color: '#4d4d4d', lineHeight: 'normal', width: '100%' }}>Compares student performance against a national cohort of Macmillan.AI users in real time for percentile rank, subject-wise and chapter-wise ranking. Far richer than the one-time benchmarking test in the book.</p>
                   </div>
                   <div className="absolute" style={{ left: 399, top: 105, width: 359, height: 359 }}>
-                    <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgBenchmark} />
+                    <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgBenchmark} loading="lazy" />
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Full-width card */}
-            <div className="bg-white card-hover relative rounded-[12px] overflow-clip shrink-0 w-full" style={{ height: 326, boxShadow: '0px 0px 5.8px 0px rgba(90,0,0,0.15)' }}>
+            <div className="bg-white card-hover relative rounded-[12px] overflow-clip shrink-0 w-full reveal-scale" style={{ height: 326, boxShadow: '0px 0px 5.8px 0px rgba(90,0,0,0.15)' }}>
               <div className="absolute flex flex-col gap-[4px] items-center text-center" style={{ left: '50%', transform: 'translateX(-50%)', top: 21, width: 819 }}>
                 <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 20, color: '#1a1a1a', lineHeight: 1.25, width: '100%' }}>Clear doubts instantly</p>
                 <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, fontSize: 14, color: '#4d4d4d', lineHeight: 'normal', width: '100%' }}>Ask anything about any chapter — explained by an AI tutor trained on Macmillan's content, calibrated to CBSE board question patterns. Voice support in all official languages.</p>
               </div>
               <div className="absolute overflow-hidden pointer-events-none" style={{ height: 222, left: 497, top: 113, width: 319 }}>
-                <img alt="" className="absolute max-w-none" style={{ height: '143.69%', left: 0, top: '-31.53%', width: '100%' }} src={imgConceptTutor} />
+                <img alt="" className="absolute max-w-none" style={{ height: '143.69%', left: 0, top: '-31.53%', width: '100%' }} src={imgConceptTutor} loading="lazy" />
               </div>
             </div>
           </div>
@@ -270,20 +331,20 @@ export default function Desktop3() {
         {/* ── PROGRESS JOURNEY ── */}
         <div className="flex flex-col gap-[24px] items-center w-full">
           {/* Track improvement */}
-          <div className="flex gap-[56px] items-center shrink-0 reveal">
+          <div className="flex gap-[56px] items-center shrink-0 reveal-left">
             <div className="flex flex-col gap-[4px] items-start shrink-0" style={{ width: 655 }}>
               <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 36, color: '#1a1a1a', lineHeight: 1.25, width: '100%' }}>Track improvement after every test</p>
               <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, fontSize: 16, color: '#4d4d4d', lineHeight: 'normal', width: '100%' }}>Visual timeline of every attempt, showing score progression, accuracy improvement, time-per-question trends, and predicted exam day performance. Shareable with parents and teachers.</p>
             </div>
             <div className="relative rounded-[16px] shrink-0" style={{ height: 375, width: 562, boxShadow: '0px 0px 4px 0px rgba(213,0,0,0.15)' }}>
-              <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none rounded-[16px] size-full" src={imgProgress} />
+              <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none rounded-[16px] size-full" src={imgProgress} loading="lazy" />
             </div>
           </div>
 
           {/* Learn topper */}
-          <div className="flex gap-[147px] items-center shrink-0 reveal">
+          <div className="flex gap-[147px] items-center shrink-0 reveal-right">
             <div className="relative shrink-0 overflow-hidden" style={{ height: 443, width: 533 }}>
-              <img alt="" className="absolute max-w-none" style={{ height: '100%', left: '-12.22%', top: 0, width: '124.58%' }} src={imgTopper} />
+              <img alt="" className="absolute max-w-none" style={{ height: '100%', left: '-12.22%', top: 0, width: '124.58%' }} src={imgTopper} loading="lazy" />
             </div>
             <div className="flex flex-col gap-[4px] items-start shrink-0" style={{ width: 655 }}>
               <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 36, color: '#1a1a1a', lineHeight: 1.25, width: '100%' }}>Learn topper answer writing</p>
@@ -292,7 +353,7 @@ export default function Desktop3() {
           </div>
 
           {/* Revise */}
-          <div className="flex gap-[28px] items-center shrink-0 w-full reveal">
+          <div className="flex gap-[28px] items-center shrink-0 w-full reveal-left">
             <div className="relative overflow-clip shrink-0" style={{ height: 323, width: 758 }}>
               <div className="absolute flex flex-col gap-[4px] items-start" style={{ left: 17.5, top: 124.5, width: 655 }}>
                 <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 36, color: '#1a1a1a', lineHeight: 1.25, width: '100%' }}>Revise only what matters</p>
@@ -300,14 +361,14 @@ export default function Desktop3() {
               </div>
             </div>
             <div className="relative shrink-0 overflow-hidden" style={{ height: 414, width: 558 }}>
-              <img alt="" className="absolute max-w-none" style={{ height: '114.11%', left: '-11.37%', top: '-5.41%', width: '127.09%' }} src={imgRevision} />
+              <img alt="" className="absolute max-w-none" style={{ height: '114.11%', left: '-11.37%', top: '-5.41%', width: '127.09%' }} src={imgRevision} loading="lazy" />
             </div>
           </div>
 
           {/* Share progress */}
-          <div className="flex gap-[28px] items-center shrink-0 reveal">
+          <div className="flex gap-[28px] items-center shrink-0 reveal-right">
             <div className="relative shrink-0" style={{ height: 362, width: 542 }}>
-              <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgParent} />
+              <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgParent} loading="lazy" />
             </div>
             <div className="relative overflow-clip shrink-0" style={{ height: 323, width: 758 }}>
               <div className="absolute flex flex-col gap-[4px] items-start" style={{ left: 17.5, top: 124.5, width: 655 }}>
@@ -320,9 +381,9 @@ export default function Desktop3() {
       </div>
 
       {/* ── WORKFLOW (Frame 39) ── */}
-      <div className="relative" style={{ background: '#f5f5f5', height: 909, overflow: 'clip', marginLeft: -3 }}>
+      <div id="preparation" className="relative" style={{ background: '#f5f5f5', height: 909, overflow: 'clip', marginLeft: -3 }}>
         {/* Header */}
-        <div className="absolute flex flex-col gap-[17px] items-center" style={{ left: 254, top: 33, width: 868 }}>
+        <div className="absolute flex flex-col gap-[17px] items-center reveal-scale" style={{ left: 254, top: 33, width: 868 }}>
           <div className="flex items-center justify-center px-[16px] py-[8px] rounded-[27px] shrink-0" style={{ background: 'rgba(221,51,51,0.1)', border: '1px solid rgba(221,51,51,0.2)' }}>
             <p className="text-[#d33] text-[14px] uppercase whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, lineHeight: 1.3 }}>Smart Adaptive Workflow</p>
           </div>
@@ -376,13 +437,13 @@ export default function Desktop3() {
       {/* ── DON'T GUESS (mock measure image) ── */}
       <div className="flex flex-col gap-[24px] items-center relative" style={{ width: 1442 }}>
         <div className="relative shrink-0" style={{ height: 839, width: 1328 }}>
-          <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgMockMeasure} />
+          <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgMockMeasure} loading="lazy" />
         </div>
 
         {/* ── VOICE CALL ── */}
-        <div className="bg-white relative overflow-clip shrink-0" style={{ height: 1130, width: 1442 }}>
+        <div id="tutors" className="bg-white relative overflow-clip shrink-0" style={{ height: 1130, width: 1442 }}>
           {/* Heading */}
-          <div className="absolute flex flex-col items-center reveal" style={{ left: '50%', transform: 'translateX(-50%) translateX(-21px)', top: 347, width: 868 }}>
+          <div className="absolute flex flex-col items-center reveal-scale" style={{ left: '50%', transform: 'translateX(-50%) translateX(-21px)', top: 347, width: 868 }}>
             <div className="flex flex-col gap-[4px] items-start text-center w-full">
               <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 36, lineHeight: 0, width: '100%' }}>
                 <span style={{ lineHeight: 1.3, color: '#dd3333' }}>Voice Call</span>
@@ -394,26 +455,26 @@ export default function Desktop3() {
 
           {/* Tutor photos */}
           <div className="absolute rounded-[12px] overflow-hidden pointer-events-none" style={{ height: 272, left: 598, top: 794, width: 219 }}>
-            <img alt="" className="absolute max-w-none" style={{ height: '104.99%', left: '-5.35%', top: '-2.04%', width: '110.42%' }} src={imgTutor53} />
+            <img alt="" className="absolute max-w-none" style={{ height: '104.99%', left: '-5.35%', top: '-2.04%', width: '110.42%' }} src={imgTutor53} loading="lazy" />
           </div>
           <div className="absolute rounded-[12px] overflow-hidden pointer-events-none" style={{ height: 225, left: 1201, top: 636, width: 181 }}>
-            <img alt="" className="absolute max-w-none" style={{ height: '103.61%', left: '-3.61%', top: '-1.44%', width: '107.67%' }} src={imgTutor55} />
+            <img alt="" className="absolute max-w-none" style={{ height: '103.61%', left: '-3.61%', top: '-1.44%', width: '107.67%' }} src={imgTutor55} loading="lazy" />
           </div>
           <div className="absolute overflow-hidden pointer-events-none" style={{ height: 278, left: 1107, top: 86, width: 223 }}>
-            <img alt="" className="absolute max-w-none" style={{ height: '103.32%', left: '-3.96%', top: '-1.66%', width: '108.29%' }} src={imgTutor56} />
+            <img alt="" className="absolute max-w-none" style={{ height: '103.32%', left: '-3.96%', top: '-1.66%', width: '108.29%' }} src={imgTutor56} loading="lazy" />
           </div>
           <div className="absolute rounded-[12px] overflow-hidden pointer-events-none" style={{ height: 293, left: 74, top: 568, width: 235 }}>
-            <img alt="" className="absolute max-w-none" style={{ height: '103.32%', left: '-3.66%', top: '-2.19%', width: '107.7%' }} src={imgTutor58} />
+            <img alt="" className="absolute max-w-none" style={{ height: '103.32%', left: '-3.66%', top: '-2.19%', width: '107.7%' }} src={imgTutor58} loading="lazy" />
           </div>
           <div className="absolute rounded-[8px] overflow-hidden pointer-events-none" style={{ height: 188, left: 162, top: 158, width: 147 }}>
-            <img alt="" className="absolute max-w-none" style={{ height: '102.72%', left: '-2.91%', top: '-1.03%', width: '105.54%' }} src={imgTutor59} />
+            <img alt="" className="absolute max-w-none" style={{ height: '102.72%', left: '-2.91%', top: '-1.03%', width: '105.54%' }} src={imgTutor59} loading="lazy" />
           </div>
           <div className="absolute overflow-hidden pointer-events-none" style={{ height: 231, left: 620, top: 64, width: 176 }}>
-            <img alt="" className="absolute max-w-none" style={{ height: '103.6%', left: '-3.56%', top: '-2.2%', width: '107.51%' }} src={imgTutor57} />
+            <img alt="" className="absolute max-w-none" style={{ height: '103.6%', left: '-3.56%', top: '-2.2%', width: '107.51%' }} src={imgTutor57} loading="lazy" />
           </div>
 
           {/* Voice widget */}
-          <div className="absolute bg-white overflow-clip rounded-[24px]" style={{ height: 282, left: 440, top: 454, width: 561, boxShadow: '0px 0px 8.3px 0px rgba(0,0,0,0.15)' }}>
+          <div className="absolute bg-white overflow-clip rounded-[24px] float-widget" style={{ height: 282, left: 440, top: 454, width: 561, boxShadow: '0px 0px 8.3px 0px rgba(0,0,0,0.15)' }}>
             {/* Avatar you */}
             <div className="absolute" style={{ left: 31, top: 55, width: 70, height: 70 }}>
               <div className="absolute" style={{ inset: '-14.57%' }}>
@@ -497,7 +558,7 @@ export default function Desktop3() {
             </div>
           </div>
           {/* Sketchpad card — exact Figma node 113:488 */}
-          <div className="bg-white relative rounded-[24px] overflow-clip shrink-0" style={{ height: 716, width: 1263, border: '6px solid #f6f7fa', boxShadow: '0px 0px 8.3px 0px rgba(0,0,0,0.15)' }}>
+          <div className="bg-white relative rounded-[24px] overflow-clip shrink-0 reveal-scale" style={{ height: 716, width: 1263, border: '6px solid #f6f7fa', boxShadow: '0px 0px 8.3px 0px rgba(0,0,0,0.15)' }}>
 
             {/* Status top-right */}
             <div className="absolute flex flex-col gap-[2px] items-center whitespace-nowrap" style={{ left: 1144, top: 37, fontFamily: "'Poppins', sans-serif", fontWeight: 400, lineHeight: 1.3 }}>
@@ -618,7 +679,7 @@ export default function Desktop3() {
         </div>
 
         {/* ── SMART LEARNING TOOLS ── */}
-        <div className="overflow-clip shrink-0 w-full reveal" style={{ background: '#fff', padding: '103px 82px 80px' }}>
+        <div id="tools" className="overflow-clip shrink-0 w-full reveal" style={{ background: '#fff', padding: '103px 82px 80px' }}>
           <div className="flex flex-col gap-[30px] items-center" style={{ width: 1279, margin: '0 auto' }}>
             {/* Header */}
             <div className="flex flex-col gap-[17px] items-center shrink-0" style={{ width: 868 }}>
@@ -647,13 +708,13 @@ export default function Desktop3() {
                   { img: imgTool47, tagBg: 'rgba(193,99,17,0.1)', tagColor: '#c16311', tag: 'GUIDED SOLUTIONS', title: 'Step-by-Step Problem Solver', desc: 'Get detailed step-by-step solutions with proper explanations for numerical and conceptual problems.' },
                 ]
               ].map((row, ri) => (
-                <div key={ri} className="flex gap-[14px] items-center shrink-0 w-full">
+                <div key={ri} className={`flex gap-[14px] items-center shrink-0 w-full ${ri === 0 ? 'reveal-left' : 'reveal-right'}`}>
                   {row.map(({ img, tagBg, tagColor, tag, title, desc }) => (
                     <div key={title} className="bg-white card-hover flex flex-1 flex-col items-start min-w-0 overflow-clip p-[16px] relative rounded-[12px]" style={{ boxShadow: '0px 0px 4px 0px rgba(0,0,0,0.15)' }}>
                       <div className="flex flex-col gap-[24px] items-start w-full">
                         <div className="flex items-start justify-between w-full">
                           <div className="relative shrink-0" style={{ width: 60, height: 60 }}>
-                            <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img} />
+                            <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img} loading="lazy" />
                           </div>
                           <div className="flex items-center justify-center px-[8px] py-[4px] rounded-[18px] shrink-0" style={{ background: tagBg }}>
                             <p className="text-[12px] uppercase whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, color: tagColor, lineHeight: 1.3 }}>{tag}</p>
@@ -691,7 +752,7 @@ export default function Desktop3() {
                 { bg: 'linear-gradient(180deg,#fff4f4 0%,#ffd9d9 100%)', roleColor: '#dd3333', role: 'Student', text: '“The rubric-based answer evaluation is my favorite feature. It checks every step just like a real examiner and helps me write better long answers for boards.”', name: 'Ananya Sharma', sub: 'Class 12 Student' },
                 { bg: '#fff', roleColor: '#1a1a1a', role: 'Parent', text: '“The board score prediction feature gives us confidence about our child’s readiness for exams. The platform feels much more advanced than regular coaching apps.”', name: 'Amit Sharma', sub: 'Parent of Class 12 Student' },
               ].map(({ bg, roleColor, role, text, name, sub }, i) => (
-                <div key={i} className="tcard-hover relative overflow-clip rounded-[20px] shrink-0" style={{ background: bg, border: '4px solid white', height: 363, width: 275, boxShadow: '0px 0px 24.2px 0px rgba(221,51,51,0.15)' }}>
+                <div key={i} className="tcard-hover relative overflow-clip rounded-[20px] shrink-0 reveal-scale" style={{ background: bg, border: '4px solid white', height: 363, width: 275, boxShadow: '0px 0px 24.2px 0px rgba(221,51,51,0.15)', transitionDelay: `${i * 0.15}s` }}>
                   {/* Quote icon */}
                   <div className="absolute flex items-center justify-center" style={{ left: i === 0 ? 15 : 16, top: i === 0 ? 23 : 29 }}>
                     <div style={{ transform: 'rotate(180deg)' }}>
@@ -730,10 +791,12 @@ export default function Desktop3() {
         </div>
 
         {/* ── CTA IMAGE ── */}
-        <div className="relative overflow-clip shrink-0 w-full reveal" style={{ height: 750 }}>
-          <div className="absolute rounded-[32px] overflow-hidden pointer-events-none" style={{ height: 536, left: '50%', transform: 'translateX(-50%)', top: 107, width: 986 }}>
-            <img alt="" className="absolute max-w-none" style={{ height: '108.58%', left: '-2.64%', top: '-4.29%', width: '104.88%' }} src={imgCTABg} />
-          </div>
+        <div id="get-started" className="relative overflow-clip shrink-0 w-full reveal-scale cursor-pointer" style={{ height: 750 }}>
+          <a href="https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan" target="_blank" rel="noopener noreferrer">
+            <div className="absolute rounded-[32px] overflow-hidden transition-all duration-300 hover:scale-[1.01] hover:shadow-xl" style={{ height: 536, left: '50%', transform: 'translateX(-50%)', top: 107, width: 986 }}>
+              <img alt="Get Started" className="absolute max-w-none" style={{ height: '108.58%', left: '-2.64%', top: '-4.29%', width: '104.88%' }} src={imgCTABg} loading="lazy" />
+            </div>
+          </a>
         </div>
       </div>
     </div>
