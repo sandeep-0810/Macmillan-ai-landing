@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_figma_figma__get_screenshot",
+      "mcp__plugin_figma_figma__get_metadata",
+      "mcp__plugin_figma_figma__get_design_context",
+      "mcp__plugin_figma_figma__use_figma",
+      "Bash(dir \"c:\\\\Users\\\\sande\\\\Desktop\\\\Mcmilan.ai\")",
+      "PowerShell(Get-ChildItem \"c:\\\\Users\\\\sande\\\\Desktop\" -Force | Where-Object { $_.PSIsContainer } | Select-Object Name)",
+      "Read(//c/Users/sande/Desktop/landing/**)",
+      "PowerShell(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\sande\\\\Desktop\\\\Mcmilan.ai\\\\src\")",
+      "PowerShell(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\sande\\\\Desktop\\\\Mcmilan.ai\\\\public\\\\assets\\\\final\")",
+      "PowerShell(Copy-Item \"C:\\\\Users\\\\sande\\\\Desktop\\\\landing\\\\assets\\\\source\\\\LOGO.png\" \"C:\\\\Users\\\\sande\\\\Desktop\\\\Mcmilan.ai\\\\public\\\\assets\\\\final\\\\logo-macmillan.png\" -Force)",
+      "PowerShell(Copy-Item \"C:\\\\Users\\\\sande\\\\Desktop\\\\landing\\\\assets\\\\source\\\\white-bg-logo.png\" \"C:\\\\Users\\\\sande\\\\Desktop\\\\Mcmilan.ai\\\\public\\\\assets\\\\final\\\\logo-white-bg.png\" -Force)",
+      "PowerShell(Invoke-WebRequest -Uri \"https://www.figma.com/api/mcp/asset/e9932e22-30c8-414b-8964-2ef394f7815f\" -OutFile \"C:\\\\Users\\\\sande\\\\Desktop\\\\Mcmilan.ai\\\\public\\\\assets\\\\final\\\\logo-macmillan-edu.png\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\sande\\\\Desktop\\\\Mcmilan.ai\" -Recurse -Force)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Sort-Object FullName)",
+      "Bash(ConvertTo-Json)",
+      "Bash(git init *)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\sande\\Desktop\\landing\\assets\\final",
+      "C:\\Users\\sande\\Desktop\\landing"
+    ]
+  }
+}

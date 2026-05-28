@@ -1,0 +1,174 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+body { font-family: 'Poppins', sans-serif; }
+
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(221, 51, 51, 0.25);
+  border-radius: 999px;
+  transition: background 0.2s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(221, 51, 51, 0.6);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(221, 51, 51, 0.25) transparent;
+}
+
+/* ── Scroll fade-in ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Navbar ── */
+.navbar-scrolled {
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(8px);
+}
+.nav-link {
+  position: relative;
+  transition: color 0.2s;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -3px; left: 0;
+  width: 0; height: 2px;
+  background: #dd3333;
+  transition: width 0.25s ease;
+}
+.nav-link:hover { color: #dd3333; }
+.nav-link:hover::after { width: 100%; }
+.nav-link.active { color: #dd3333; }
+.nav-link.active::after { width: 100%; }
+
+/* ── Button hover ── */
+.btn-primary {
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  background: #bb2222 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(221,51,51,0.35);
+}
+.btn-primary:active { transform: translateY(0); }
+
+.btn-ghost {
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-ghost:hover {
+  background: rgba(221,51,51,0.18) !important;
+  transform: translateY(-1px);
+}
+
+/* ── Feature / tool cards ── */
+.card-hover {
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s cubic-bezier(0.16,1,0.3,1);
+  cursor: default;
+}
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 40px rgba(90,0,0,0.12) !important;
+}
+
+/* ── Testimonial cards ── */
+.tcard-hover {
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s;
+}
+.tcard-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 40px rgba(221,51,51,0.2) !important;
+}
+
+/* ── Queue cards ── */
+.queue-hover {
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.queue-hover:hover {
+  border-color: #dd3333 !important;
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(221,51,51,0.1);
+}
+
+/* ── Icon buttons ── */
+.icon-btn {
+  transition: background 0.2s, transform 0.15s;
+  cursor: pointer;
+}
+.icon-btn:hover {
+  background: #e8e8ea !important;
+  transform: scale(1.08);
+}
+
+/* ── Live badge pulse ── */
+.live-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #dd3333;
+  margin-right: 6px;
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(221,51,51,0.5); }
+  50%       { opacity: 0.8; transform: scale(1.2); box-shadow: 0 0 0 5px rgba(221,51,51,0); }
+}
+
+/* ── Waveform animation ── */
+.waveform-bar {
+  background: rgba(221,51,51,0.7);
+  border-radius: 2px;
+  animation: wave 1.2s ease-in-out infinite;
+}
+.waveform-bar:nth-child(1)  { animation-delay: 0.0s; }
+.waveform-bar:nth-child(2)  { animation-delay: 0.1s; }
+.waveform-bar:nth-child(3)  { animation-delay: 0.2s; }
+.waveform-bar:nth-child(4)  { animation-delay: 0.3s; }
+.waveform-bar:nth-child(5)  { animation-delay: 0.15s; }
+.waveform-bar:nth-child(6)  { animation-delay: 0.25s; }
+.waveform-bar:nth-child(7)  { animation-delay: 0.35s; }
+.waveform-bar:nth-child(8)  { animation-delay: 0.05s; }
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.4); opacity: 0.5; }
+  50%       { transform: scaleY(1);   opacity: 1;   }
+}
+
+/* ── Connected status dot ── */
+.connected-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #11a939;
+  margin-right: 4px;
+  animation: pulse-green 2s ease-in-out infinite;
+}
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(17,169,57,0.5); }
+  50%       { box-shadow: 0 0 0 4px rgba(17,169,57,0); }
+}
+
+/* ── Workflow tags ── */
+.workflow-tag-hover {
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: default;
+}
+.workflow-tag-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
