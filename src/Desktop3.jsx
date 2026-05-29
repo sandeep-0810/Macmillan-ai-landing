@@ -381,7 +381,7 @@ export default function Desktop3() {
       </div>
 
       {/* ── WORKFLOW (Frame 39) ── */}
-      <div id="preparation" className="relative" style={{ background: '#f5f5f5', height: 909, overflow: 'clip', marginLeft: -3 }}>
+      {false && <div id="preparation" className="relative" style={{ background: '#f5f5f5', height: 909, overflow: 'clip', marginLeft: -3 }}>
         {/* Header */}
         <div className="absolute flex flex-col gap-[17px] items-center reveal-scale" style={{ left: 254, top: 33, width: 868 }}>
           <div className="flex items-center justify-center px-[16px] py-[8px] rounded-[27px] shrink-0" style={{ background: 'rgba(221,51,51,0.1)', border: '1px solid rgba(221,51,51,0.2)' }}>
@@ -432,7 +432,7 @@ export default function Desktop3() {
         <div className="workflow-tag-hover absolute flex items-center justify-center px-[6px] py-[4px] rounded-[2px]" style={{ background: 'rgba(34,37,37,0.05)', left: 125, top: 672 }}>
           <p className="text-[16px] whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, color: 'rgba(26,26,26,0.8)' }}>Daily study target (30/60/90 min)</p>
         </div>
-      </div>
+      </div>}
 
       {/* ── DON'T GUESS (mock measure image) ── */}
       <div className="flex flex-col gap-[24px] items-center relative" style={{ width: 1442 }}>
