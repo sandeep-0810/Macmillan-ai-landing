@@ -635,6 +635,16 @@ function WorkflowSection() {
 export default function Desktop3() {
   useReveal()
   const [activeSection, setActiveSection] = useState('')
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [email, setEmail] = useState(() => localStorage.getItem('mcm_email') || '')
+  const [password, setPassword] = useState(() => localStorage.getItem('mcm_password') || '')
+
+  const handleLoginSubmit = (e) => {
+    e.preventDefault();
+    localStorage.setItem('mcm_email', email);
+    localStorage.setItem('mcm_password', password);
+    window.location.href = "https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan";
+  };
 
   useEffect(() => {
     const sections = ['features', 'preparation', 'tools', 'tutors', 'get-started']
@@ -714,12 +724,12 @@ export default function Desktop3() {
 
         {/* Buttons */}
         <div className="flex gap-[10px] items-center justify-end shrink-0">
-          <a href="https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan" target="_blank" rel="noopener noreferrer" className="btn-ghost flex h-[40px] items-center justify-center overflow-clip px-[16px] py-[10px] rounded-[6px] shrink-0" style={{ background: 'rgba(221,51,51,0.08)', textDecoration: 'none' }}>
+          <button onClick={() => setShowLoginModal(true)} className="btn-ghost flex h-[40px] items-center justify-center overflow-clip px-[16px] py-[10px] rounded-[6px] shrink-0" style={{ background: 'rgba(221,51,51,0.08)', border: 'none', cursor: 'pointer' }}>
             <p className="text-[#d33] text-[15px] whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Login</p>
-          </a>
-          <a href="https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan" target="_blank" rel="noopener noreferrer" className="btn-primary flex h-[40px] items-center justify-center overflow-clip px-[16px] py-[10px] rounded-[6px] shrink-0" style={{ background: '#dd3333', textDecoration: 'none' }}>
+          </button>
+          <button onClick={() => setShowLoginModal(true)} className="btn-primary flex h-[40px] items-center justify-center overflow-clip px-[16px] py-[10px] rounded-[6px] shrink-0" style={{ background: '#dd3333', border: 'none', cursor: 'pointer' }}>
             <p className="text-white text-[15px] whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Get Started</p>
-          </a>
+          </button>
         </div>
       </div>
 
@@ -730,9 +740,9 @@ export default function Desktop3() {
 
         {/* CTA button */}
         <div className="absolute flex gap-[10px] items-start justify-end" style={{ left: '50%', transform: 'translateX(-50%) translateX(0.5px)', top: 261 }}>
-          <a href="https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan" target="_blank" rel="noopener noreferrer" className="btn-primary flex h-[45px] items-center justify-center overflow-clip px-[16px] py-[12px] rounded-[6px] shrink-0" style={{ background: '#dd3333', textDecoration: 'none' }}>
+          <button onClick={() => setShowLoginModal(true)} className="btn-primary flex h-[45px] items-center justify-center overflow-clip px-[16px] py-[12px] rounded-[6px] shrink-0" style={{ background: '#dd3333', border: 'none', cursor: 'pointer' }}>
             <p className="text-white text-[16px] whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Attempt your first Mock Test</p>
-          </a>
+          </button>
         </div>
 
         {/* Score card top-left */}
@@ -1288,13 +1298,48 @@ export default function Desktop3() {
 
         {/* ── CTA IMAGE ── */}
         <div id="get-started" className="relative overflow-clip shrink-0 w-full reveal-scale cursor-pointer" style={{ height: 750 }}>
-          <a href="https://structuredlearningdemo-copy-production.up.railway.app/dashboard?tab=plan" target="_blank" rel="noopener noreferrer">
+          <div onClick={() => setShowLoginModal(true)}>
             <div className="absolute rounded-[32px] overflow-hidden transition-all duration-300 hover:scale-[1.01] hover:shadow-xl" style={{ height: 536, left: '50%', transform: 'translateX(-50%)', top: 107, width: 986 }}>
               <img alt="Get Started" className="absolute max-w-none" style={{ height: '108.58%', left: '-2.64%', top: '-4.29%', width: '104.88%' }} src={imgCTABg} loading="lazy" />
             </div>
-          </a>
+          </div>
         </div>
       </div>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-[1000] bg-black/60 backdrop-blur-sm" onClick={() => setShowLoginModal(false)}>
+          <div className="bg-white rounded-[24px] p-8 w-full max-w-[400px] relative shadow-2xl" onClick={e => e.stopPropagation()}>
+            <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold" onClick={() => setShowLoginModal(false)}>&times;</button>
+            <div className="flex flex-col items-center mb-6">
+              <div className="w-16 h-16 bg-[#dd3333]/10 rounded-[16px] text-[#dd3333] flex items-center justify-center mb-4">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Macmillan.AI</h2>
+              <p className="text-sm text-gray-500">Sign in to continue your CBSE preparation</p>
+            </div>
+            <form onSubmit={handleLoginSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-left">Email Address</label>
+                <div className="relative">
+                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                  <input type="email" placeholder="student@cbse2026.in" value={email} onChange={e => setEmail(e.target.value)} required className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#dd3333] focus:bg-white transition-all text-sm" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-left">Password</label>
+                <div className="relative">
+                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#dd3333] focus:bg-white transition-all text-sm" />
+                </div>
+              </div>
+              <button type="submit" className="w-full bg-[#dd3333] text-white py-4 rounded-xl font-bold text-[15px] hover:bg-[#c02b2b] transition-all flex items-center justify-center gap-2">
+                Enter Platform <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
