@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './styles.css'
 
 function useReveal() {
@@ -84,6 +84,553 @@ const imgComma       = "https://www.figma.com/api/mcp/asset/fafe9645-51b2-4a9f-9
 
 // ── CTA
 const imgCTABg       = "https://www.figma.com/api/mcp/asset/cfe5b066-7375-4757-b2f4-b4b76aed1cfa"
+
+// ── Helpers
+function nodeCompleted(id, p) {
+  if (p >= 0.20 && id === 1) return true
+  if (p >= 0.40 && id === 2) return true
+  if (p >= 0.60 && id === 3) return true
+  if (p >= 0.80 && id === 4) return true
+  if (p >= 0.96 && id === 5) return true
+  return false
+}
+function nodeActive(id, p) {
+  if (id === 1 && p < 0.20) return true
+  if (id === 2 && p >= 0.20 && p < 0.40) return true
+  if (id === 3 && p >= 0.40 && p < 0.60) return true
+  if (id === 4 && p >= 0.60 && p < 0.80) return true
+  if (id === 5 && p >= 0.80) return true
+  return false
+}
+
+const STAGES = [
+  {
+    id: 1, step: 'STEP 01', keyword: 'PLAN',
+    headline: 'Plan Your Success from Day One',
+    description: 'Macmillan.AI creates a personalised study plan based on your class, subjects, and board exam date — deciding what to study, which sample papers to attempt, and how many mocks to complete. It adapts every week based on your performance.',
+    chips: ['Chapter-wise study schedule', 'Mock test calendar auto-set', 'Countdown to board date', 'Weak chapter priority boost', 'Daily study target (30/60/90 min)'],
+  },
+  {
+    id: 2, step: 'STEP 02', keyword: 'LEARN',
+    headline: 'Concept Understanding via CBSE AI Tutors',
+    description: 'Students learn each chapter using Macmillan content powered by live AI tutors that explain concepts, generate examples, answer doubts, and teach according to CBSE question trends.',
+    chips: ['Chapter concept explanations', 'CBSE pattern-aligned teaching', 'Voice queries in Hindi/English', 'Diagram & formula revision', 'PYQ frequency analysis'],
+  },
+  {
+    id: 3, step: 'STEP 03', keyword: 'PRACTICE',
+    headline: 'Unlimited Mock Tests — Extrapolated from Macmillan',
+    description: 'Students attempt AI-generated mocks based on Macmillan sample papers and CBSE 2026 blueprint structure, with timed full-length and chapter-wise modes.',
+    chips: ['12 Macmillan original papers', 'Unlimited AI-generated extras', 'Exact CBSE blueprint match', 'Timed full-length mode', 'Chapter-wise targeted test'],
+  },
+  {
+    id: 4, step: 'STEP 04', keyword: 'ANALYSE',
+    headline: 'AI Evaluation + Marks Prediction + Rubric Feedback',
+    description: 'The AI evaluates answers using CBSE marking schemes, predicts board scores, and provides step-by-step actionable feedback so students know exactly where marks were lost.',
+    chips: ['CBSE marking scheme AI evaluation', 'Step-by-step marks awarded', '% Board score predictor', 'Topper answer comparison', 'National benchmark percentile'],
+  },
+  {
+    id: 5, step: 'STEP 05', keyword: 'IMPROVE',
+    headline: 'Personalised AI Improvement Plan — Closes Every Gap',
+    description: 'AI identifies the highest-priority improvements and creates a focused roadmap to maximise board score — targeting weak chapters, retry questions, and parent progress reports.',
+    chips: ['Top 5 improvement priorities', 'Score improvement trajectory', 'Concept-level remediation', 'Retry weakest questions', 'Parent progress report'],
+  },
+]
+
+function WorkflowSection() {
+  const containerRef = useRef(null)
+  const [progress, setProgress] = useState(0)
+  const [typedMsg, setTypedMsg] = useState('')
+  const [ocrScan, setOcrScan] = useState(true)
+  const [scoreCount, setScoreCount] = useState(0)
+  const [dailyTarget, setDailyTarget] = useState(60)
+  const [practiceAns, setPracticeAns] = useState(null)
+  const [tickTime, setTickTime] = useState('02:14:36')
+
+  const activeStage = Math.min(Math.max(Math.floor(progress / 0.2) + 1, 1), 5)
+  const isCelebration = progress >= 0.96
+
+  // Progress lines between nodes
+  const line1 = Math.min(Math.max((progress - 0.05) / 0.15, 0), 1) * 100
+  const line2 = Math.min(Math.max((progress - 0.25) / 0.15, 0), 1) * 100
+  const line3 = Math.min(Math.max((progress - 0.45) / 0.15, 0), 1) * 100
+  const line4 = Math.min(Math.max((progress - 0.65) / 0.15, 0), 1) * 100
+  const lines = [line1, line2, line3, line4]
+
+  // Scroll tracking
+  useEffect(() => {
+    const onScroll = () => {
+      if (!containerRef.current) return
+      const rect = containerRef.current.getBoundingClientRect()
+      const total = rect.height - (window.innerHeight - 80)
+      if (total <= 0) return
+      const p = Math.min(Math.max(-rect.top / total, 0), 1)
+      setProgress(p)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Countdown timer
+  useEffect(() => {
+    const t = setInterval(() => {
+      setTickTime(prev => {
+        const [h, m, s] = prev.split(':').map(Number)
+        let ns = s - 1, nm = m, nh = h
+        if (ns < 0) { ns = 59; nm-- }
+        if (nm < 0) { nm = 59; nh-- }
+        if (nh < 0) return '02:14:36'
+        return `${String(nh).padStart(2,'0')}:${String(nm).padStart(2,'0')}:${String(ns).padStart(2,'0')}`
+      })
+    }, 1000)
+    return () => clearInterval(t)
+  }, [])
+
+  // Stage 2 typing effect
+  useEffect(() => {
+    if (activeStage !== 2) return
+    setTypedMsg('')
+    const full = "V = IR represents Ohm's Law. Current through a metallic conductor is directly proportional to the voltage across its terminals. Frequently tested as 5-marker in CBSE Physics boards."
+    let i = 0
+    const iv = setInterval(() => {
+      if (i < full.length) { setTypedMsg(full.slice(0, i + 2)); i += 2 }
+      else clearInterval(iv)
+    }, 22)
+    return () => clearInterval(iv)
+  }, [activeStage])
+
+  // Stage 3 OCR scan toggle
+  useEffect(() => {
+    if (activeStage !== 3) return
+    const iv = setInterval(() => setOcrScan(p => !p), 2000)
+    return () => clearInterval(iv)
+  }, [activeStage])
+
+  // Stage 4 score counter
+  useEffect(() => {
+    if (activeStage !== 4) return
+    let c = 0
+    const iv = setInterval(() => {
+      if (c < 91) { c++; setScoreCount(c) } else clearInterval(iv)
+    }, 16)
+    return () => clearInterval(iv)
+  }, [activeStage])
+
+  const scrollToStage = (id) => {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const top = rect.top + window.scrollY
+    const total = rect.height - window.innerHeight
+    const target = top + ((id - 1) * 0.2 + 0.08) * total
+    window.scrollTo({ top: target, behavior: 'smooth' })
+  }
+
+  return (
+    <div ref={containerRef} id="preparation" style={{ height: '650vh', position: 'relative', width: '100%' }}>
+      <div style={{
+        position: 'sticky', top: 80, width: '100%', height: 'calc(100vh - 80px)',
+        background: '#f5f5f5', display: 'flex', flexDirection: 'column',
+        fontFamily: "'Poppins', sans-serif", overflow: 'hidden',
+        borderTop: '1px solid #ebebeb'
+      }}>
+        <div style={{ maxWidth: 1328, margin: '0 auto', padding: '28px 56px 20px', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
+
+          {/* Section header */}
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', padding: '6px 16px', borderRadius: 27, background: 'rgba(221,51,51,0.1)', border: '1px solid rgba(221,51,51,0.2)', marginBottom: 10 }}>
+                <p style={{ color: '#dd3333', fontSize: 13, fontWeight: 400, letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>Smart Adaptive Workflow</p>
+              </div>
+              <h2 style={{ fontSize: 32, fontWeight: 600, color: '#1a1a1a', lineHeight: 1.25, margin: 0 }}>
+                A Structured Workflow for{' '}
+                <span style={{ color: '#dd3333' }}>Smarter Board Preparation</span>
+              </h2>
+              <p style={{ fontSize: 15, fontWeight: 400, color: '#4d4d4d', marginTop: 6, lineHeight: 1.5 }}>
+                Macmillan combines planning, concept learning, mock practice, answer evaluation, and improvement tracking into one continuous preparation system.
+              </p>
+            </div>
+
+            {/* Progress bar */}
+            <div style={{ background: '#fff', borderRadius: 16, padding: '16px 24px 28px', border: '1px solid #ebebeb', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', position: 'relative' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+                {STAGES.map((stg, idx) => {
+                  const completed = nodeCompleted(stg.id, progress)
+                  const active = nodeActive(stg.id, progress)
+                  return (
+                    <div key={stg.id} style={{ flex: idx < 4 ? 1 : 'none', display: 'flex', alignItems: 'center' }}>
+                      <button
+                        onClick={() => scrollToStage(stg.id)}
+                        style={{
+                          position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center',
+                          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                        }}
+                      >
+                        <div style={{
+                          width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontWeight: 700, fontSize: 13, transition: 'all 0.3s',
+                          background: completed ? '#dd3333' : active ? '#1a1a1a' : '#f0f0f0',
+                          color: completed || active ? '#fff' : '#999',
+                          boxShadow: active ? '0 0 0 6px rgba(221,51,51,0.12)' : 'none',
+                          transform: active ? 'scale(1.12)' : 'scale(1)',
+                        }}>
+                          {completed ? '✓' : String(stg.id).padStart(2, '0')}
+                        </div>
+                        <span style={{
+                          position: 'absolute', top: 46, fontSize: 11, fontWeight: 700,
+                          letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+                          color: active ? '#dd3333' : completed ? '#1a1a1a' : '#aaa',
+                          transition: 'color 0.3s',
+                        }}>{stg.keyword}</span>
+                      </button>
+                      {idx < 4 && (
+                        <div style={{ flex: 1, height: 3, margin: '0 8px', background: '#f0f0f0', borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
+                          <div style={{
+                            position: 'absolute', left: 0, top: 0, height: '100%',
+                            width: `${lines[idx]}%`, background: '#dd3333', borderRadius: 4,
+                            transition: 'width 0.08s linear',
+                            boxShadow: lines[idx] > 0 ? '0 0 6px rgba(221,51,51,0.5)' : 'none'
+                          }} />
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Main two-column layout */}
+          <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '5fr 7fr', gap: 32, minHeight: 0, alignItems: 'center' }}>
+
+            {/* Left — text */}
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden' }}>
+              <div key={isCelebration ? 'celebrate' : activeStage} style={{ animation: 'wf-fadein 0.32s ease' }}>
+                {isCelebration ? (
+                  <div>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 27, background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', marginBottom: 12 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Board Ready</span>
+                    </div>
+                    <h3 style={{ fontSize: 28, fontWeight: 600, color: '#1a1a1a', lineHeight: 1.25, margin: '0 0 12px' }}>CBSE Board Ready Achievement</h3>
+                    <p style={{ fontSize: 14, color: '#4d4d4d', lineHeight: 1.6, margin: '0 0 16px' }}>
+                      Outstanding cycle completed. Macmillan AI forecasts CBSE Board Exam readiness at premium benchmarks.
+                    </p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+                      {['Chemistry — 94%', 'Physics — 91%', 'Mathematics — 92%', '92% Overall Predicted'].map((sc, i) => (
+                        <span key={i} style={{ padding: '5px 12px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 6, fontSize: 12, fontWeight: 600, color: '#059669' }}>✓ {sc}</span>
+                      ))}
+                    </div>
+                    <button onClick={() => scrollToStage(1)} style={{ padding: '10px 24px', background: '#1a1a1a', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                      ↺ Restart Experience
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', padding: '5px 14px', borderRadius: 27, background: 'rgba(221,51,51,0.1)', border: '1px solid rgba(221,51,51,0.2)', marginBottom: 10 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#dd3333', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{STAGES[activeStage - 1].step}</span>
+                    </div>
+                    <h3 style={{ fontSize: 24, fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, margin: '0 0 10px' }}>{STAGES[activeStage - 1].headline}</h3>
+                    <p style={{ fontSize: 14, color: '#4d4d4d', lineHeight: 1.6, margin: '0 0 16px' }}>{STAGES[activeStage - 1].description}</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+                      {STAGES[activeStage - 1].chips.map((chip, i) => (
+                        <span key={i} className="workflow-tag-hover" style={{ padding: '5px 12px', background: '#fff', border: '1px solid #e8e8e8', borderRadius: 6, fontSize: 12, fontWeight: 500, color: '#333', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#dd3333', display: 'inline-block', flexShrink: 0 }} />
+                          {chip}
+                        </span>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => scrollToStage(Math.min(activeStage + 1, 5))}
+                      className="btn-primary"
+                      style={{ padding: '10px 24px', background: '#dd3333', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                    >
+                      {STAGES[activeStage - 1].chips[0].split(' ')[0] === 'Chapter' ? 'Generate My Study Plan' :
+                       activeStage === 2 ? 'Start Learning Now' :
+                       activeStage === 3 ? 'Start Live Mock Test' :
+                       activeStage === 4 ? 'Analyse My Performance' : 'Start Improvement Sprint'}
+                      {' →'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right — interactive canvas */}
+            <div style={{
+              height: '100%', maxHeight: '60vh', background: '#fff', border: '1px solid #ebebeb',
+              borderRadius: 20, padding: '20px 24px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+              display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative'
+            }}>
+              <div key={isCelebration ? 'c' : activeStage} style={{ animation: 'wf-fadein 0.32s ease', height: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+                {/* CELEBRATION */}
+                {isCelebration && (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: 16 }}>
+                    <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(221,51,51,0.08)', border: '2px solid rgba(221,51,51,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🏆</div>
+                    <div>
+                      <p style={{ fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>CBSE Exam Readiness</p>
+                      <h4 style={{ fontSize: 28, fontWeight: 700, color: '#1a1a1a', margin: 0 }}>BOARD READY</h4>
+                    </div>
+                    <div style={{ background: '#1a1a1a', borderRadius: 16, padding: '20px 28px', width: '100%', maxWidth: 320 }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px' }}>Predicted Board Score</p>
+                      <p style={{ fontSize: 48, fontWeight: 800, color: '#dd3333', margin: 0, lineHeight: 1 }}>92%</p>
+                      <p style={{ fontSize: 11, color: '#666', marginTop: 10, lineHeight: 1.5 }}>Based on Macmillan sample responses modelled with CBSE rubric algorithms. Deviation ±1.5%.</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* STAGE 1 — PLAN */}
+                {!isCelebration && activeStage === 1 && (
+                  <>
+                    <div style={{ background: '#f8f8f8', border: '1px solid #ebebeb', borderRadius: 14, padding: '12px 14px', flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Study Calendar</span>
+                        <span style={{ fontSize: 10, fontWeight: 600, color: '#dd3333', background: 'rgba(221,51,51,0.08)', padding: '2px 10px', borderRadius: 12 }}>Adaptive Plan</span>
+                      </div>
+                      {[
+                        { sub: 'Physics', topic: 'Electromagnetic Induction – PYQ', hrs: '1.5 Hrs', accent: '#dd3333' },
+                        { sub: 'Chemistry', topic: 'Electrochemistry Formulas', hrs: '1.0 Hrs', accent: '#f59e0b' },
+                        { sub: 'Mathematics', topic: 'Definite Integrals Drill #02', hrs: '2.0 Hrs', accent: '#6366f1' },
+                      ].map((r, i) => (
+                        <div key={i} style={{ background: '#fff', borderLeft: `4px solid ${r.accent}`, borderRadius: 8, padding: '8px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div>
+                            <span style={{ fontSize: 9, fontWeight: 700, color: '#999', textTransform: 'uppercase', display: 'block' }}>{r.sub}</span>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: '#1a1a1a' }}>{r.topic}</span>
+                          </div>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: '#4d4d4d', fontFamily: 'monospace' }}>{r.hrs}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                      <div style={{ background: '#f8f8f8', border: '1px solid #ebebeb', borderRadius: 12, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <svg width="36" height="36" viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
+                          <circle cx="18" cy="18" r="15" fill="none" stroke="#f0f0f0" strokeWidth="3" />
+                          <circle cx="18" cy="18" r="15" fill="none" stroke="#dd3333" strokeWidth="3" strokeDasharray="94" strokeDashoffset="26" />
+                          <text x="18" y="22" textAnchor="middle" fontSize="8" fontWeight="700" fill="#1a1a1a" style={{ transform: 'rotate(90deg)', transformOrigin: '18px 18px' }}>72D</text>
+                        </svg>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 700, color: '#dd3333', margin: 0 }}>72 Days Left</p>
+                          <p style={{ fontSize: 9, fontWeight: 600, color: '#999', margin: 0 }}>CBSE Board Date</p>
+                        </div>
+                      </div>
+                      <div style={{ background: '#f8f8f8', border: '1px solid #ebebeb', borderRadius: 12, padding: '10px 14px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                          <span style={{ fontSize: 9, fontWeight: 700, color: '#999', textTransform: 'uppercase' }}>Daily Target</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: '#dd3333' }}>{dailyTarget}m / 90m</span>
+                        </div>
+                        <input type="range" min="30" max="90" value={dailyTarget} onChange={e => setDailyTarget(+e.target.value)}
+                          style={{ width: '100%', accentColor: '#dd3333', height: 4, cursor: 'pointer' }} />
+                      </div>
+                      <div style={{ background: 'rgba(221,51,51,0.05)', border: '1px solid rgba(221,51,51,0.12)', borderRadius: 12, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 18 }}>✦</span>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: '#1a1a1a', margin: 0 }}>92% Forecast Target</p>
+                          <p style={{ fontSize: 9, color: '#999', margin: 0 }}>Plan adapted automatically</p>
+                        </div>
+                      </div>
+                      <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 12, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 16 }}>⚠</span>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: '#92400e', margin: 0 }}>Trigonometry Alert</p>
+                          <p style={{ fontSize: 9, color: '#b45309', margin: 0 }}>PYQ Accuracy Dropped</p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* STAGE 2 — LEARN */}
+                {!isCelebration && activeStage === 2 && (
+                  <>
+                    <div style={{ background: '#f8f8f8', border: '1px solid #ebebeb', borderRadius: 14, padding: '12px 14px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e8e8e8', paddingBottom: 8, marginBottom: 10 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: '#999', textTransform: 'uppercase' }}>Macmillan Live Session</span>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: '#22c55e' }}>● LIVE RESPONSE</span>
+                      </div>
+                      <div style={{ background: '#f0f0f0', borderRadius: 8, padding: '8px 12px', marginBottom: 8, maxWidth: '70%' }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: '#999', display: 'block', marginBottom: 2 }}>STUDENT QUESTION</span>
+                        <p style={{ fontSize: 12, fontWeight: 600, color: '#1a1a1a', margin: 0 }}>"Explain Kirchhoff's Law in Hindi"</p>
+                      </div>
+                      <div style={{ background: 'rgba(221,51,51,0.04)', border: '1px solid rgba(221,51,51,0.12)', borderRadius: 8, padding: '10px 12px', marginLeft: 'auto', maxWidth: '85%' }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: '#dd3333', display: 'block', marginBottom: 4 }}>AI TUTOR RESPONSE</span>
+                        <p style={{ fontSize: 11, fontWeight: 500, color: '#1a1a1a', margin: 0, lineHeight: 1.5, minHeight: 36 }}>
+                          {typedMsg || 'Reading...'}
+                          <span style={{ display: 'inline-block', width: 2, height: 13, background: '#dd3333', marginLeft: 2, verticalAlign: 'middle', animation: 'wf-blink 1s step-end infinite' }} />
+                        </p>
+                      </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                      <div style={{ background: '#1a1a1a', borderRadius: 12, padding: '10px 14px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                          <span style={{ fontSize: 9, fontWeight: 700, color: '#dd3333', textTransform: 'uppercase' }}>Voice Sync</span>
+                          <span style={{ fontSize: 14 }}>🔊</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 24 }}>
+                          {[12,19,25,14,8,21,15,26,9,20].map((h, i) => (
+                            <div key={i} className="waveform-bar" style={{ flex: 1, height: `${h * 0.9}px` }} />
+                          ))}
+                        </div>
+                      </div>
+                      <div style={{ background: '#f8f8f8', border: '1px solid #ebebeb', borderRadius: 12, padding: '10px 14px' }}>
+                        <span style={{ fontSize: 9, fontWeight: 600, color: '#999', display: 'block' }}>Interactive Formula</span>
+                        <p style={{ fontSize: 26, fontWeight: 800, color: '#dd3333', margin: '4px 0 2px', letterSpacing: 2 }}>V = IR</p>
+                        <span style={{ fontSize: 9, color: '#999', fontWeight: 500 }}>Expected 5-marker trend</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* STAGE 3 — PRACTICE */}
+                {!isCelebration && activeStage === 3 && (
+                  <>
+                    <div style={{ background: '#f8f8f8', border: '1px solid #ebebeb', borderRadius: 14, padding: '12px 14px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e8e8e8', paddingBottom: 8, marginBottom: 10 }}>
+                        <div>
+                          <span style={{ fontSize: 9, fontWeight: 700, color: '#999', textTransform: 'uppercase', display: 'block' }}>CBSE Blueprint Paper</span>
+                          <p style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', margin: 0 }}>Macmillan Trial Paper #04</p>
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', fontFamily: 'monospace' }}>{tickTime}</span>
+                      </div>
+                      <div style={{ background: '#fff', borderRadius: 10, padding: '10px 12px', border: '1px solid #ebebeb', marginBottom: 10 }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: '#6366f1', background: 'rgba(99,102,241,0.08)', padding: '2px 8px', borderRadius: 4 }}>SECTION B — 3 Marks</span>
+                        <p style={{ fontSize: 12, fontWeight: 600, color: '#1a1a1a', marginTop: 8, lineHeight: 1.5 }}>
+                          Determine the magnetic flux associated with a rectangular coil of 50 turns and dimensions 10cm × 5cm operating adjacent to current index rules.
+                        </p>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        {['2.5 × 10⁻³ Wb', '1.25 × 10⁻³ Wb', '3.0 × 10⁻³ Wb', '0.75 × 10⁻³ Wb'].map(opt => (
+                          <button key={opt} onClick={() => setPracticeAns(opt)} style={{
+                            padding: '8px 10px', borderRadius: 8, border: `1.5px solid ${practiceAns === opt ? '#dd3333' : '#e8e8e8'}`,
+                            background: practiceAns === opt ? 'rgba(221,51,51,0.06)' : '#fff',
+                            fontSize: 11, fontWeight: 700, color: practiceAns === opt ? '#dd3333' : '#4d4d4d',
+                            cursor: 'pointer', fontFamily: 'monospace', transition: 'all 0.15s', textAlign: 'left'
+                          }}>{opt}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{ background: '#1a1a1a', borderRadius: 12, padding: '10px 14px', position: 'relative', overflow: 'hidden' }}>
+                      <div style={{
+                        position: 'absolute', left: 0, right: 0, height: 1,
+                        background: 'linear-gradient(90deg, transparent, #dd3333, transparent)',
+                        top: ocrScan ? '15%' : '85%', transition: 'top 2s ease-in-out'
+                      }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: '#dd3333', textTransform: 'uppercase' }}>AI OCR Scan Engine</span>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: '#22c55e' }}>Running Scan...</span>
+                      </div>
+                      <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 16 }}>⊙</span>
+                        <div>
+                          <p style={{ fontSize: 11, fontWeight: 700, color: '#fff', margin: 0 }}>Student_CBSE_Ans_Sh14.jpeg</p>
+                          <p style={{ fontSize: 9, color: '#888', margin: 0 }}>Validating step marking points dynamically</p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* STAGE 4 — ANALYSE */}
+                {!isCelebration && activeStage === 4 && (
+                  <>
+                    <div style={{ background: '#f8f8f8', border: '1px solid #ebebeb', borderRadius: 14, padding: '12px 14px', flex: 1 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: '#999', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>Marking Assessment Feedback</span>
+                      {[
+                        { label: 'STEP 1', title: 'Formula Statement (V = IR) Check', note: '+1.0 Marks credited', accent: '#dd3333', noteColor: '#16a34a' },
+                        { label: 'STEP 2', title: 'Resistance computation details missing', note: 'No deduction (diagram credit applied)', accent: '#f59e0b', noteColor: '#b45309' },
+                      ].map((s, i) => (
+                        <div key={i} style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 10, padding: '10px 12px', marginBottom: 8, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                          <span style={{ background: s.accent, color: '#fff', fontSize: 9, fontWeight: 700, padding: '2px 8px', borderRadius: 4, flexShrink: 0, fontFamily: 'monospace' }}>{s.label}</span>
+                          <div>
+                            <p style={{ fontSize: 11, fontWeight: 700, color: '#1a1a1a', margin: '0 0 3px' }}>{s.title}</p>
+                            <p style={{ fontSize: 10, fontWeight: 600, color: s.noteColor, margin: 0 }}>{s.note}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                      <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 12, padding: '10px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: '#999', textTransform: 'uppercase', marginBottom: 8 }}>Score Predictor</span>
+                        <div style={{ position: 'relative', width: 52, height: 52 }}>
+                          <svg width="52" height="52" viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)' }}>
+                            <circle cx="18" cy="18" r="14" fill="none" stroke="#f0f0f0" strokeWidth="3" />
+                            <circle cx="18" cy="18" r="14" fill="none" stroke="#dd3333" strokeWidth="3" strokeDasharray="88" strokeDashoffset={88 - (88 * scoreCount) / 100} style={{ transition: 'stroke-dashoffset 0.05s' }} />
+                          </svg>
+                          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: '#1a1a1a' }}>{scoreCount}%</div>
+                        </div>
+                        <span style={{ fontSize: 9, color: '#dd3333', fontWeight: 600, marginTop: 6 }}>Recalibrating...</span>
+                      </div>
+                      <div style={{ background: 'rgba(221,51,51,0.04)', border: '1px solid rgba(221,51,51,0.12)', borderRadius: 12, padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: '#dd3333', textTransform: 'uppercase' }}>Weakness Heatmap</span>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 4, marginTop: 8 }}>
+                          {['Electro', 'Inorg', 'Organic'].map((l, i) => (
+                            <span key={i} style={{ fontSize: 9, fontWeight: 700, padding: '4px 2px', borderRadius: 4, textAlign: 'center', background: i === 1 ? '#dd3333' : '#fff', color: i === 1 ? '#fff' : '#4d4d4d', border: i !== 1 ? '1px solid #e8e8e8' : 'none' }}>{l}</span>
+                          ))}
+                        </div>
+                        <span style={{ fontSize: 9, color: '#999', fontWeight: 500, marginTop: 6 }}>Actionable priority active</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* STAGE 5 — IMPROVE */}
+                {!isCelebration && activeStage === 5 && (
+                  <>
+                    <div style={{ background: '#1a1a1a', borderRadius: 14, padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: '#dd3333', textTransform: 'uppercase' }}>Remediation Sprint</span>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: '#22c55e' }}>READY TO FLIP</span>
+                      </div>
+                      {[
+                        { label: '1.', text: 'Organic Chemical Compounds Review', pts: '+2.5 Score Target' },
+                        { label: '2.', text: 'Case-Study Reasoning Questions', pts: '+1.5 Score Target' },
+                      ].map((r, i) => (
+                        <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '8px 12px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 18, height: 18, borderRadius: '50%', background: '#dd3333', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <span style={{ fontSize: 9, color: '#fff', fontWeight: 700 }}>✓</span>
+                          </div>
+                          <div>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: '#fff', margin: 0, lineHeight: 1.3 }}>{r.text}</p>
+                            <p style={{ fontSize: 9, color: '#888', margin: 0 }}>{r.pts}</p>
+                          </div>
+                        </div>
+                      ))}
+                      <p style={{ fontSize: 9, color: '#666', margin: 0 }}>Keep scrolling to resolve final forecast!</p>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                      <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 12, padding: '10px 14px' }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: '#999', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Sprint Trajectory</span>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'monospace', fontSize: 12, fontWeight: 800 }}>
+                          <span style={{ color: '#999' }}>72%</span>
+                          <span style={{ color: '#ccc', fontSize: 10 }}>›</span>
+                          <span style={{ color: '#666' }}>81%</span>
+                          <span style={{ color: '#ccc', fontSize: 10 }}>›</span>
+                          <span style={{ color: '#dd3333' }}>92%</span>
+                        </div>
+                      </div>
+                      <div style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 12, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 18 }}>👨‍👩‍👧</span>
+                        <div>
+                          <p style={{ fontSize: 11, fontWeight: 700, color: '#1a1a1a', margin: 0 }}>Guardian SMS Linked</p>
+                          <p style={{ fontSize: 9, color: '#059669', fontWeight: 600, margin: 0 }}>Status Shared</p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes wf-fadein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes wf-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+      `}</style>
+    </div>
+  )
+}
 
 export default function Desktop3() {
   useReveal()
@@ -381,58 +928,7 @@ export default function Desktop3() {
       </div>
 
       {/* ── WORKFLOW (Frame 39) ── */}
-      {false && <div id="preparation" className="relative" style={{ background: '#f5f5f5', height: 909, overflow: 'clip', marginLeft: -3 }}>
-        {/* Header */}
-        <div className="absolute flex flex-col gap-[17px] items-center reveal-scale" style={{ left: 254, top: 33, width: 868 }}>
-          <div className="flex items-center justify-center px-[16px] py-[8px] rounded-[27px] shrink-0" style={{ background: 'rgba(221,51,51,0.1)', border: '1px solid rgba(221,51,51,0.2)' }}>
-            <p className="text-[#d33] text-[14px] uppercase whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, lineHeight: 1.3 }}>Smart Adaptive Workflow</p>
-          </div>
-          <div className="flex flex-col gap-[4px] items-start text-center w-full">
-            <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 36, lineHeight: 0, color: '#1a1a1a', width: '100%' }}>
-              <span style={{ lineHeight: 1.3 }}>A Structured Workflow for </span>
-              <span style={{ lineHeight: 1.3, color: '#dd3333' }}>Smarter Board Preparation</span>
-            </p>
-            <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, fontSize: 18, color: '#333', lineHeight: 1.3, width: '100%' }}>
-              Macmillan combines planning, concept learning, mock practice, answer evaluation, and improvement tracking into one continuous preparation system.
-            </p>
-          </div>
-        </div>
-
-        {/* Vertical red line */}
-        <div className="absolute flex items-center justify-center" style={{ height: 331, left: 113, top: 370, width: 2 }}>
-          <div style={{ transform: 'rotate(-90deg)' }}>
-            <div style={{ background: '#dd3333', height: 2, width: 331 }} />
-          </div>
-        </div>
-
-        {/* Plan label */}
-        <p className="absolute text-[#d33] text-[16px] text-center whitespace-nowrap" style={{ left: '50%', transform: 'translateX(-50%)', fontFamily: "'Poppins', sans-serif", fontWeight: 500, lineHeight: 1.3, left: 142.5, top: 363 }}>Plan</p>
-
-        {/* Plan content */}
-        <div className="absolute flex flex-col gap-[4px] items-start" style={{ left: 125, top: 389, width: 598 }}>
-          <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 20, color: '#1a1a1a', lineHeight: 1.3, width: 465 }}>Board Exam Study Plan — Personalised from Day One</p>
-          <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, fontSize: 16, color: 'rgba(26,26,26,0.8)', lineHeight: 'normal', width: '100%' }}>
-            Student enters their class (10 or 12), selects subjects, and sets their board exam date. The AI generates a personalised study plan: which chapters to study this week, which Macmillan sample papers to attempt in which order, and how many mock tests to complete before boards. The plan adapts every week based on practice performance.
-          </p>
-        </div>
-
-        {/* Tags */}
-        <div className="workflow-tag-hover absolute flex items-center justify-center px-[6px] py-[4px] rounded-[2px]" style={{ background: 'rgba(221,51,51,0.1)', left: 125, top: 586 }}>
-          <p className="text-[#d33] text-[16px] whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}>Chapter-wise study schedule</p>
-        </div>
-        <div className="workflow-tag-hover absolute flex items-center justify-center px-[6px] py-[4px] rounded-[2px]" style={{ background: 'rgba(221,51,51,0.1)', left: 383, top: 586 }}>
-          <p className="text-[#d33] text-[16px] whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}>Mock test calendar auto-set</p>
-        </div>
-        <div className="workflow-tag-hover absolute flex items-center justify-center px-[6px] py-[4px] rounded-[2px]" style={{ background: 'rgba(34,37,37,0.05)', left: 125, top: 631 }}>
-          <p className="text-[16px] whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, color: 'rgba(26,26,26,0.8)' }}>Countdown to board date</p>
-        </div>
-        <div className="workflow-tag-hover absolute flex items-center justify-center px-[6px] py-[4px] rounded-[2px]" style={{ background: 'rgba(34,37,37,0.05)', left: 351, top: 631 }}>
-          <p className="text-[16px] whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, color: 'rgba(26,26,26,0.8)' }}>Weak chapter priority boost</p>
-        </div>
-        <div className="workflow-tag-hover absolute flex items-center justify-center px-[6px] py-[4px] rounded-[2px]" style={{ background: 'rgba(34,37,37,0.05)', left: 125, top: 672 }}>
-          <p className="text-[16px] whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, color: 'rgba(26,26,26,0.8)' }}>Daily study target (30/60/90 min)</p>
-        </div>
-      </div>}
+      <WorkflowSection />
 
       {/* ── DON'T GUESS (mock measure image) ── */}
       <div className="flex flex-col gap-[24px] items-center relative" style={{ width: 1442 }}>
