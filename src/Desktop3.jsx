@@ -739,7 +739,7 @@ export default function Desktop3() {
         <div className="absolute" style={{ height: 887, left: -76, top: -54, width: 1774 }} />
 
         {/* CTA button */}
-        <div className="absolute flex gap-[10px] items-start justify-end" style={{ left: '50%', transform: 'translateX(-50%) translateX(0.5px)', top: 261 }}>
+        <div className="absolute flex gap-[10px] items-start justify-end" style={{ left: '50%', transform: 'translateX(-50%) translateX(0.5px)', top: 237 }}>
           <button onClick={() => setShowLoginModal(true)} className="btn-primary flex h-[45px] items-center justify-center overflow-clip px-[16px] py-[12px] rounded-[6px] shrink-0" style={{ background: '#dd3333', border: 'none', cursor: 'pointer' }}>
             <p className="text-white text-[16px] whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Attempt your first Mock Test</p>
           </button>
@@ -772,7 +772,7 @@ export default function Desktop3() {
         </div>
 
         {/* Hero heading */}
-        <div className="absolute flex flex-col gap-[15px] items-center" style={{ left: '50%', transform: 'translateX(-50%)', top: 18, width: 1156 }}>
+        <div className="absolute flex flex-col gap-[15px] items-center" style={{ left: '50%', transform: 'translateX(-50%)', top: 50, width: 1156 }}>
           <div className="flex gap-[10px] items-center justify-center px-[16px] py-[8px] rounded-[27px] shrink-0" style={{ background: 'rgba(221,51,51,0.1)', border: '1px solid rgba(221,51,51,0.2)' }}>
             <div className="relative shrink-0" style={{ width: 20, height: 20 }}>
               <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeroBadge} fetchpriority="high" />
@@ -783,14 +783,10 @@ export default function Desktop3() {
           </div>
           <div className="flex flex-col gap-[8px] items-center text-center w-full">
             <div style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 48, lineHeight: 0, color: '#1a1a1a', width: 868, whiteSpace: 'pre-wrap' }}>
-              <p style={{ marginBottom: 0 }}>
-                <span style={{ lineHeight: 1.25 }}>India's First </span>
-                <span style={{ lineHeight: 1.25, color: '#dd3333' }}>CBSE Board Exam AI </span>
-              </p>
-              <p style={{ lineHeight: 1.25 }}>for Personalized Learning Journeys</p>
+              <p style={{ lineHeight: 1.25 }}>Score Higher in <span style={{ color: '#dd3333' }}>CBSE Boards.</span></p>
             </div>
             <p style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400, fontSize: 18, color: '#333', lineHeight: 1.3, width: 784 }}>
-              Predict your marks, understand every concept, and track your progress from your first mock test to exam day.
+              India's First AI That Builds Your Personal Study Plan — and Keeps You On Track Till Results Day
             </p>
           </div>
         </div>
